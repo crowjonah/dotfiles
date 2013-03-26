@@ -70,8 +70,13 @@ endif
 
 let b:current_syntax = "json"
 if main_syntax == 'json'
+<<<<<<< HEAD
   unlet main_syntax
 endif
 
 " Vim settings {{{2
 " vim: ts=8 fdm=marker
+=======
+	unlet main_syntax
+endif
+>>>>>>> 7e824c8dd7010e558f319f73a7ffaf76f95a410f

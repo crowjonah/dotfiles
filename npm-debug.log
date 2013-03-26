@@ -1,0 +1,173 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', '-g', 'nave' ]
+2 info using npm@1.1.66
+3 info using node@v0.8.15
+4 verbose read json /usr/local/lib/package.json
+5 verbose read json /usr/local/lib/package.json
+6 verbose cache add [ 'nave', null ]
+7 silly cache add name=undefined spec="nave" args=["nave",null]
+8 verbose parsed url { pathname: 'nave', path: 'nave', href: 'nave' }
+9 silly lockFile eee8cf25-nave nave
+10 verbose lock nave /Users/cnorlander/.npm/eee8cf25-nave.lock
+11 silly lockFile eee8cf25-nave nave
+12 verbose addNamed [ 'nave', '' ]
+13 verbose addNamed [ null, '' ]
+14 silly lockFile 1db6d0e1-nave nave@
+15 verbose lock nave@ /Users/cnorlander/.npm/1db6d0e1-nave.lock
+16 silly addNameRange { name: 'nave', range: '', hasData: false }
+17 verbose url raw nave
+18 verbose url resolving [ 'https://registry.npmjs.org/', './nave' ]
+19 verbose url resolved https://registry.npmjs.org/nave
+20 info trying registry request attempt 1 at 16:02:00
+21 http GET https://registry.npmjs.org/nave
+22 http 200 https://registry.npmjs.org/nave
+23 silly registry.get cb [ 200,
+23 silly registry.get   { vary: 'Accept',
+23 silly registry.get     server: 'CouchDB/1.2.1 (Erlang OTP/R15B03)',
+23 silly registry.get     etag: '"6EM6OTEOH443RQW1KAMJVMNOE"',
+23 silly registry.get     date: 'Tue, 26 Mar 2013 20:02:01 GMT',
+23 silly registry.get     'content-type': 'application/json',
+23 silly registry.get     'content-length': '102863' } ]
+24 silly addNameRange number 2 { name: 'nave', range: '', hasData: true }
+25 silly addNameRange versions [ 'nave',
+25 silly addNameRange   [ '0.0.5',
+25 silly addNameRange     '0.0.6',
+25 silly addNameRange     '0.0.7',
+25 silly addNameRange     '0.1.1',
+25 silly addNameRange     '0.1.2',
+25 silly addNameRange     '0.1.3',
+25 silly addNameRange     '0.1.4',
+25 silly addNameRange     '0.1.5',
+25 silly addNameRange     '0.1.6',
+25 silly addNameRange     '0.1.7',
+25 silly addNameRange     '0.1.8',
+25 silly addNameRange     '0.2.0',
+25 silly addNameRange     '0.2.1',
+25 silly addNameRange     '0.2.3',
+25 silly addNameRange     '0.2.4',
+25 silly addNameRange     '0.2.5',
+25 silly addNameRange     '0.2.6',
+25 silly addNameRange     '0.2.7',
+25 silly addNameRange     '0.2.8',
+25 silly addNameRange     '0.2.9',
+25 silly addNameRange     '0.2.10',
+25 silly addNameRange     '0.2.11',
+25 silly addNameRange     '0.2.12',
+25 silly addNameRange     '0.2.13',
+25 silly addNameRange     '0.2.14',
+25 silly addNameRange     '0.3.0',
+25 silly addNameRange     '0.3.1',
+25 silly addNameRange     '0.4.0',
+25 silly addNameRange     '0.4.1',
+25 silly addNameRange     '0.4.2',
+25 silly addNameRange     '0.4.3' ] ]
+26 verbose addNamed [ 'nave', '0.4.3' ]
+27 verbose addNamed [ '0.4.3', '0.4.3' ]
+28 silly lockFile d906fe7c-nave-0-4-3 nave@0.4.3
+29 verbose lock nave@0.4.3 /Users/cnorlander/.npm/d906fe7c-nave-0-4-3.lock
+30 silly lockFile fea32ffc-ry-npmjs-org-nave-nave-0-4-3-tgz https://registry.npmjs.org/nave/-/nave-0.4.3.tgz
+31 verbose lock https://registry.npmjs.org/nave/-/nave-0.4.3.tgz /Users/cnorlander/.npm/fea32ffc-ry-npmjs-org-nave-nave-0-4-3-tgz.lock
+32 verbose addRemoteTarball [ 'https://registry.npmjs.org/nave/-/nave-0.4.3.tgz',
+32 verbose addRemoteTarball   '5fa95016644f08a978e064d8a413a3fc8b33b272' ]
+33 info retry fetch attempt 1 at 16:02:02
+34 verbose fetch to= /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/tmp.tgz
+35 http GET https://registry.npmjs.org/nave/-/nave-0.4.3.tgz
+36 http 200 https://registry.npmjs.org/nave/-/nave-0.4.3.tgz
+37 silly shasum updated bytes 7401
+38 info shasum 5fa95016644f08a978e064d8a413a3fc8b33b272
+38 info shasum /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/tmp.tgz
+39 verbose tar unpack /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/tmp.tgz
+40 silly lockFile 0be8fc26-22043-0-3647160241380334-package /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package
+41 verbose lock /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package /Users/cnorlander/.npm/0be8fc26-22043-0-3647160241380334-package.lock
+42 silly gunzTarPerm modes [ '755', '644' ]
+43 silly gunzTarPerm extractEntry package.json
+44 silly gunzTarPerm extractEntry .npmignore
+45 silly gunzTarPerm extractEntry README.md
+46 silly gunzTarPerm extractEntry LICENSE
+47 silly gunzTarPerm extractEntry AUTHORS
+48 silly gunzTarPerm extractEntry nave.sh
+49 verbose read json /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package/package.json
+50 silly lockFile 0be8fc26-22043-0-3647160241380334-package /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package
+51 verbose from cache /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package/package.json
+52 verbose tar pack [ '/Users/cnorlander/.npm/nave/0.4.3/package.tgz',
+52 verbose tar pack   '/var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package' ]
+53 verbose tarball /Users/cnorlander/.npm/nave/0.4.3/package.tgz
+54 verbose folder /var/folders/_6/7rgf8m3165gf9knwqp211q2c0000gs/T/npm-25473/1364328122043-0.3647160241380334/package
+55 silly lockFile 28f0f516-ander-npm-nave-0-4-3-package-tgz /Users/cnorlander/.npm/nave/0.4.3/package.tgz
+56 verbose lock /Users/cnorlander/.npm/nave/0.4.3/package.tgz /Users/cnorlander/.npm/28f0f516-ander-npm-nave-0-4-3-package-tgz.lock
+57 silly lockFile 28f0f516-ander-npm-nave-0-4-3-package-tgz /Users/cnorlander/.npm/nave/0.4.3/package.tgz
+58 silly lockFile f17df6ef-norlander-npm-nave-0-4-3-package /Users/cnorlander/.npm/nave/0.4.3/package
+59 verbose lock /Users/cnorlander/.npm/nave/0.4.3/package /Users/cnorlander/.npm/f17df6ef-norlander-npm-nave-0-4-3-package.lock
+60 silly lockFile f17df6ef-norlander-npm-nave-0-4-3-package /Users/cnorlander/.npm/nave/0.4.3/package
+61 verbose tar unpack /Users/cnorlander/.npm/nave/0.4.3/package.tgz
+62 silly lockFile f17df6ef-norlander-npm-nave-0-4-3-package /Users/cnorlander/.npm/nave/0.4.3/package
+63 verbose lock /Users/cnorlander/.npm/nave/0.4.3/package /Users/cnorlander/.npm/f17df6ef-norlander-npm-nave-0-4-3-package.lock
+64 silly gunzTarPerm modes [ '755', '644' ]
+65 silly gunzTarPerm extractEntry package.json
+66 silly gunzTarPerm extractEntry .npmignore
+67 silly gunzTarPerm extractEntry README.md
+68 silly gunzTarPerm extractEntry LICENSE
+69 silly gunzTarPerm extractEntry AUTHORS
+70 silly gunzTarPerm extractEntry nave.sh
+71 verbose read json /Users/cnorlander/.npm/nave/0.4.3/package/package.json
+72 silly lockFile f17df6ef-norlander-npm-nave-0-4-3-package /Users/cnorlander/.npm/nave/0.4.3/package
+73 silly shasum updated bytes 7396
+74 info shasum c4a6858e9a99559f2f03d55987e4527c84f70de0
+74 info shasum /Users/cnorlander/.npm/nave/0.4.3/package.tgz
+75 verbose from cache /Users/cnorlander/.npm/nave/0.4.3/package/package.json
+76 verbose chmod /Users/cnorlander/.npm/nave/0.4.3/package.tgz 644
+77 verbose chown /Users/cnorlander/.npm/nave/0.4.3/package.tgz [ 505, 20 ]
+78 silly lockFile fea32ffc-ry-npmjs-org-nave-nave-0-4-3-tgz https://registry.npmjs.org/nave/-/nave-0.4.3.tgz
+79 silly lockFile d906fe7c-nave-0-4-3 nave@0.4.3
+80 silly lockFile 1db6d0e1-nave nave@
+81 silly resolved [ { name: 'nave',
+81 silly resolved     author: { name: 'Isaac Z. Schlueter', email: 'i@izs.me' },
+81 silly resolved     description: 'Virtual Environments for Node',
+81 silly resolved     version: '0.4.3',
+81 silly resolved     preferGlobal: true,
+81 silly resolved     bin: { nave: './nave.sh' },
+81 silly resolved     LICENSE: 'BSD',
+81 silly resolved     contributors: [ [Object], [Object], [Object], [Object], [Object], [Object] ],
+81 silly resolved     readme: '# nave\n\nVirtual Environments for Node\n\n## Installation\n\nIf you want a global `nave` command, you could install this thing with npm.\nBut that\'s not really necessary.  You can run the `nave.sh` shell script\nfrom here, or symlink it wherever you want.\n\n## Usage\n\n    Usage: nave <cmd>\n\n    Commands:\n\n    install <version>    Install the version passed (ex: 0.1.103)\n    use <version>        Enter a subshell where <version> is being used\n    use <ver> <program>  Enter a subshell, and run "<program>", then exit\n    use <name> <ver>     Create a named env, using the specified version.\n                         If the name already exists, but the version differs,\n                         then it will update the link.\n    usemain <version>    Install in /usr/local/bin (ie, use as your main nodejs)\n    clean <version>      Delete the source code for <version>\n    uninstall <version>  Delete the install for <version>\n    ls                   List versions currently installed\n    ls-remote            List remote node versions\n    ls-all               List remote and local node versions\n    latest               Show the most recent dist version\n    help                 Output help information\n\n    <version> can be the string "latest" to get the latest distribution.\n    <version> can be the string "stable" to get the latest stable version.\n\nThat\'s about it.  Enjoy.\n\nWhen you\'re done using a specific version of node, just exit the shell to return\nto where you were before using nave.\n\n## env vars\n\n* `$NAVE` The current shell.  Either a version, or a name and version.\n* `$NAVENAME` The name of the current shell.  Equal to `$NAVEVERSION` in\n  unnammed environments.\n* `$NAVEVERSION` The version of node that the current shell is pointing\n  to.  (This should comply with `node -v`.)\n* `$NAVELVL` The level of nesting in the subshell.\n* `$NAVE_DEBUG` Set to 1 to run nave in `bash -x` style.\n* `$NAVE_DIR` Set to the location where you\'d like nave to do its\n  business.  Defaults to `~/.nave`.\n* `$NAVE_CONFIG` Set this to an array of arguments to pass to\n  `./configure`.  Defaults to `("--debug")`.  (Note that parens are\n  required to supply multiple arguments.  I use `("--debug"\n  "--without-npm")` on my own system, since I\'m usually using nave to\n  test npm, so installing it in the subshell doesn\'t help much.)  This\n  can be set in the `~/.naverc` file, or in your normal\n  `~/.bash{rc,_profile}` files.\n* `$NAVE_JOBS` If set, this will be the number of jobs to run when\n  building node.  If this isn\'t set, it\'ll use the `$JOBS` env, then try\n  to guess a reasonable value based on the number of CPUs, then fall\n  back on 2 if `sysctl -n hw.ncpu` fails.\n\n## Compatibility\n\nPrior to version 0.2, nave would run programs as `node <program>`.\nHowever, this is somewhat more limiting, so was dropped.  If you prefer the\nold style, just prefix your command with `node`.\n\nNave requires bash.  It will probably never work on Windows, or other systems\nlack a native Bourne Again Shell.  Sorry.\n\nNave logins work with bash and zsh.  If your shell doesn\'t set the\n`BASH` environment variable, then nave assumes you\'re using zsh.  As\nsuch, strange archaic shells like sh, csh, tcsh, ksh, and the like will not\nwork.\n\n\n## Configuration\n\nNave will source `~/.naverc` on initialization of a new subshell, if it\nexists and is readable.\n\nYou may control the place where nave puts things by setting the\n`NAVE_DIR` environment variable.  However, note that this must be set\nsomewhere *other* than `~/.naverc`, since it needs to be set in the\n*parent* shell where the `nave` command is invoked.\n\nBy default, nave puts its stuff in `~/.nave/`.  If this directory does\nnot exist and cannot be created, then it will attempt to use the location\nof the nave.sh bash script itself.  If it cannot write to this location,\nthen it will exit with an error.\n\n## Credits\n\nnave borrows concepts, inspiration, and code from Tim Caswell\'s "nvm" and Kris\nKowal\'s "sea" programs.\n\nSea is really nice, but is very tied to Narwhal.  Also, it\'s a require.paths\nmanager, which nave is not.\n\nNvm is also really nice, but has to be sourced rather than being run, and\nthus is a little bit wonky for some use cases.  But it doesn\'t involve\nsubshells, which makes it better for some others.\n',
+81 silly resolved     readmeFilename: 'README.md',
+81 silly resolved     _id: 'nave@0.4.3',
+81 silly resolved     dist: { shasum: 'c4a6858e9a99559f2f03d55987e4527c84f70de0' },
+81 silly resolved     _from: 'nave' } ]
+82 info install nave@0.4.3 into /usr/local/lib
+83 info installOne nave@0.4.3
+84 verbose from cache /Users/cnorlander/.npm/nave/0.4.3/package/package.json
+85 info /usr/local/lib/node_modules/nave unbuild
+86 verbose read json /usr/local/lib/node_modules/nave/package.json
+87 verbose tar unpack /Users/cnorlander/.npm/nave/0.4.3/package.tgz
+88 silly lockFile 99bad7a6-usr-local-lib-node-modules-nave /usr/local/lib/node_modules/nave
+89 verbose lock /usr/local/lib/node_modules/nave /Users/cnorlander/.npm/99bad7a6-usr-local-lib-node-modules-nave.lock
+90 silly gunzTarPerm modes [ '755', '644' ]
+91 error Error: EACCES, mkdir '/usr/local/lib/node_modules/nave'
+91 error  { [Error: EACCES, mkdir '/usr/local/lib/node_modules/nave']
+91 error   errno: 3,
+91 error   code: 'EACCES',
+91 error   path: '/usr/local/lib/node_modules/nave',
+91 error   fstream_type: 'Directory',
+91 error   fstream_path: '/usr/local/lib/node_modules/nave',
+91 error   fstream_class: 'DirWriter',
+91 error   fstream_stack:
+91 error    [ 'DirWriter._create (/usr/local/lib/node_modules/npm/node_modules/fstream/lib/dir-writer.js:36:23)',
+91 error      '/usr/local/lib/node_modules/npm/node_modules/mkdirp/index.js:37:53',
+91 error      'Object.oncomplete (fs.js:297:15)' ] }
+92 error Please try running this command again as root/Administrator.
+93 error System Darwin 12.2.1
+94 error command "node" "/usr/local/bin/npm" "install" "-g" "nave"
+95 error cwd /Users/cnorlander/dotfiles
+96 error node -v v0.8.15
+97 error npm -v 1.1.66
+98 error path /usr/local/lib/node_modules/nave
+99 error fstream_path /usr/local/lib/node_modules/nave
+100 error fstream_type Directory
+101 error fstream_class DirWriter
+102 error code EACCES
+103 error errno 3
+104 error stack Error: EACCES, mkdir '/usr/local/lib/node_modules/nave'
+105 error fstream_stack DirWriter._create (/usr/local/lib/node_modules/npm/node_modules/fstream/lib/dir-writer.js:36:23)
+105 error fstream_stack /usr/local/lib/node_modules/npm/node_modules/mkdirp/index.js:37:53
+105 error fstream_stack Object.oncomplete (fs.js:297:15)
+106 verbose exit [ 3, true ]
