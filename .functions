@@ -142,3 +142,7 @@ gifify() {
   fi
 }
 
+function gerrit() {
+	git push $1 HEAD:refs/for/master
+}
+
