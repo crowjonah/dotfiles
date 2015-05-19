@@ -143,6 +143,6 @@ gifify() {
 }
 
 function gerrit() {
-	git push $1 HEAD:refs/for/master
+	git push $1 HEAD:refs/heads/master
 }
 
