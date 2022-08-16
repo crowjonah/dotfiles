@@ -1,4 +1,9 @@
-" Make vim more useful
+" Use the Solarized Dark theme
+set background=dark
+colorscheme solarized
+let g:solarized_termtrans=1
+
+" Make Vim more useful
 set nocompatible
 
 " Set syntax highlighting options.
@@ -105,44 +110,54 @@ if bufwinnr(1)
   map - <C-W>-
 endif
 
-" Better split switching (Ctrl-j, Ctrl-k, Ctrl-h, Ctrl-l)
-map <C-j> <C-W>j
-map <C-k> <C-W>k
-map <C-H> <C-W>h
-map <C-L> <C-W>l
+" Don’t create backups when editing files in certain directories
+set backupskip=/tmp/*,/private/tmp/*
 
-" Sudo write (,W)
-noremap <leader>W :w !sudo tee %<CR>
-
-" Remap :W to :w
-command W w
-
-" Better mark jumping (line + col)
-nnoremap ' `
-
-" Hard to type things
-imap >> →
-imap << ←
-imap ^^ ↑
-imap VV ↓
-imap aa λ
-
-" Toggle show tabs and trailing spaces (,c)
-set lcs=tab:›\ ,trail:·,eol:¬,nbsp:_
-set fcs=fold:-
-nnoremap <silent> <leader>c :set nolist!<CR>
-
-" Clear last search (,qs)
-map <silent> <leader>qs <Esc>:noh<CR>
-" map <silent> <leader>qs <Esc>:let @/ = ""<CR>
-
-" Vim on the iPad
-if &term == "xterm-ipad"
-  nnoremap <Tab> <Esc>
-  vnoremap <Tab> <Esc>gV
-  onoremap <Tab> <Esc>
-  inoremap <Tab> <Esc>`^
-  inoremap <Leader><Tab> <Tab>
+" Respect modeline in files
+set modeline
+set modelines=4
+" Enable per-directory .vimrc files and disable unsafe commands in them
+set exrc
+set secure
+" Enable line numbers
+set number
+" Enable syntax highlighting
+syntax on
+" Highlight current line
+set cursorline
+" Make tabs as wide as two spaces
+set tabstop=2
+" Show “invisible” characters
+set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_
+set list
+" Highlight searches
+set hlsearch
+" Ignore case of searches
+set ignorecase
+" Highlight dynamically as pattern is typed
+set incsearch
+" Always show status line
+set laststatus=2
+" Enable mouse in all modes
+set mouse=a
+" Disable error bells
+set noerrorbells
+" Don’t reset cursor to start of line when moving around.
+set nostartofline
+" Show the cursor position
+set ruler
+" Don’t show the intro message when starting Vim
+set shortmess=atI
+" Show the current mode
+set showmode
+" Show the filename in the window titlebar
+set title
+" Show the (partial) command as it’s being typed
+set showcmd
+" Use relative line numbers
+if exists("&relativenumber")
+	set relativenumber
+	au BufReadPost * set relativenumber
 endif
 
 " Remap keys for auto-completion, disable arrow keys
@@ -193,67 +208,17 @@ function! StripWhitespace ()
     call setpos('.', save_cursor)
     call setreg('/', old_query)
 endfunction
-noremap <leader>ss :call StripWhitespace ()<CR>
 
-" Save and restore folds
-" :au BufWinLeave * mkview
-" :au BufWinEnter * silent loadview
+noremap <leader>ss :call StripWhitespace()<CR>
+" Save a file as root (,W)
+noremap <leader>W :w !sudo tee % > /dev/null<CR>
 
-" Join lines and restore cursor location (J)
-nnoremap J mjJ`j
-
-" Toggle folds (<Space>)
-nnoremap <silent> <space> :exe 'silent! normal! '.((foldclosed('.')>0)? 'zMzx' : 'zc')<CR>
-
-" Fix page up and down
-map <PageUp> <C-U>
-map <PageDown> <C-D>
-imap <PageUp> <C-O><C-U>
-imap <PageDown> <C-O><C-D>
-
-" Restore cursor position
-autocmd BufReadPost *
-  \ if line("'\"") > 1 && line("'\"") <= line("$") |
-  \   exe "normal! g`\"" |
-  \ endif
-
-" Set relative line numbers
-set relativenumber " Use relative line numbers. Current line is still in status bar.
-au BufReadPost,BufNewFile * set relativenumber
-
-" Emulate bundles, allow plugins to live independantly. Easier to manage.
-call pathogen#runtime_append_all_bundles()
-filetype plugin indent on
-
-" JSON
-au BufRead,BufNewFile *.json set ft=json syntax=javascript
-
-" Jade
-au BufRead,BufNewFile *.jade set ft=jade syntax=jade
-
-" Common Ruby files
-au BufRead,BufNewFile Rakefile,Capfile,Gemfile,.autotest,.irbrc,*.treetop,*.tt set ft=ruby syntax=ruby
-
-" Nu
-au BufNewFile,BufRead *.nu,*.nujson,Nukefile setf nu
-
-" Coffee Folding
-au BufNewFile,BufReadPost *.coffee setl foldmethod=indent nofoldenable
-
-" ZSH
-au BufRead,BufNewFile .zsh_rc,.functions,.commonrc set ft=zsh
-
-" CtrlP
-let g:ctrlp_match_window_bottom = 0 " Show at top of window
-let g:ctrlp_working_path_mode = 2 " Smart path mode
-let g:ctrlp_mru_files = 1 " Enable Most Recently Used files feature
-let g:ctrlp_jump_to_buffer = 2 " Jump to tab AND buffer if already open
-let g:ctrlp_split_window = 1 " <CR> = New Tab
-
-" Clojure.vim
-let g:vimclojure#ParenRainbow = 1 " Enable rainbow parens
-let g:vimclojure#DynamicHighlighting = 1 " Dynamic highlighting
-let g:vimclojure#FuzzyIndent = 1 " Names beginning in 'def' or 'with' to be indented as if they were included in the 'lispwords' option
-
-" Rainbow Parenthesis
-nnoremap <leader>rp :RainbowParenthesesToggle<CR>
+" Automatic commands
+if has("autocmd")
+	" Enable file type detection
+	filetype on
+	" Treat .json files as .js
+	autocmd BufNewFile,BufRead *.json setfiletype json syntax=javascript
+	" Treat .md files as Markdown
+	autocmd BufNewFile,BufRead *.md setlocal filetype=markdown
+endif
