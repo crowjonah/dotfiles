@@ -12,3 +12,30 @@ Thumbs.db
 # Files that might appear on external disks
 .Spotlight-V100
 .Trashes
+
+# Local/sensitive shell overrides (keep untracked)
+.extra
+.secrets
+
+# SSH and GPG private material
+.ssh/
+.gnupg/
+
+# Direnv / env files
+.env
+.env.*
+.direnv/
+
+# Runtime and cache noise
+*.log
+*.swp
+*.swo
+*~
+
+# Tool caches/state that should remain machine-local
+.cache/
+.npm/
+.nvm/.cache/
+.pnpm-store/
+.yarn/cache/
+.zcompdump*
