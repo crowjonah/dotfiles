@@ -1,218 +1,259 @@
 #!/usr/bin/env bash
 
 # Create a new directory and enter it
-function mkd() {
-	mkdir -p "$@" && cd "$_";
+mkd() {
+  mkdir -p "$@" && cd "$_"
 }
 
 # Change working directory to the top-most Finder window location
-function cdf() { # short for `cdfinder`
-	cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
+cdf() {
+  cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')"
 }
-
-# Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
-function targz() {
-	local tmpFile="${@%/}.tar";
-	tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1;
-
-	size=$(
-		stat -f"%z" "${tmpFile}" 2> /dev/null; # macOS `stat`
-		stat -c"%s" "${tmpFile}" 2> /dev/null;  # GNU `stat`
-	);
-
-	local cmd="";
-	if (( size < 52428800 )) && hash zopfli 2> /dev/null; then
-		# the .tar file is smaller than 50 MB and Zopfli is available; use it
-		cmd="zopfli";
-	else
-		if hash pigz 2> /dev/null; then
-			cmd="pigz";
-		else
-			cmd="gzip";
-		fi;
-	fi;
-
-	echo "Compressing .tar ($((size / 1000)) kB) using \`${cmd}\`…";
-	"${cmd}" -v "${tmpFile}" || return 1;
-	[ -f "${tmpFile}" ] && rm "${tmpFile}";
-
-	zippedSize=$(
-		stat -f"%z" "${tmpFile}.gz" 2> /dev/null; # macOS `stat`
-		stat -c"%s" "${tmpFile}.gz" 2> /dev/null; # GNU `stat`
-	);
-
-	echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully.";
-}
-
 
 # find shorthand
-function f() {
-    find . -name "$1"
+f() {
+  find . -name "$1"
 }
 
-# cd into whatever is the forefront Finder window.
-cdf() {  # short for cdfinder
-  cd "`osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)'`"
-}
+# Create a .tar.gz archive, using zopfli, pigz, or gzip for compression
+targz() {
+  local tmpFile="${@%/}.tar"
+  local size
+  local cmd
+  local zippedSize
 
+  tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1
 
-# Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
-function targz() {
-	local tmpFile="${@%/}.tar";
-	tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1;
+  size=$(
+    stat -f"%z" "${tmpFile}" 2>/dev/null || \
+    stat -c"%s" "${tmpFile}" 2>/dev/null
+  )
 
-	size=$(
-		stat -f"%z" "${tmpFile}" 2> /dev/null; # macOS `stat`
-		stat -c"%s" "${tmpFile}" 2> /dev/null;  # GNU `stat`
-	);
+  if (( size < 52428800 )) && command -v zopfli >/dev/null 2>&1; then
+    cmd="zopfli"
+  elif command -v pigz >/dev/null 2>&1; then
+    cmd="pigz"
+  else
+    cmd="gzip"
+  fi
 
-	local cmd="";
-	if (( size < 52428800 )) && hash zopfli 2> /dev/null; then
-		# the .tar file is smaller than 50 MB and Zopfli is available; use it
-		cmd="zopfli";
-	else
-		if hash pigz 2> /dev/null; then
-			cmd="pigz";
-		else
-			cmd="gzip";
-		fi;
-	fi;
+  echo "Compressing .tar ($((size / 1000)) kB) using ${cmd}..."
+  "${cmd}" -v "${tmpFile}" || return 1
+  [ -f "${tmpFile}" ] && rm "${tmpFile}"
 
-	echo "Compressing .tar ($((size / 1000)) kB) using \`${cmd}\`…";
-	"${cmd}" -v "${tmpFile}" || return 1;
-	[ -f "${tmpFile}" ] && rm "${tmpFile}";
+  zippedSize=$(
+    stat -f"%z" "${tmpFile}.gz" 2>/dev/null || \
+    stat -c"%s" "${tmpFile}.gz" 2>/dev/null
+  )
 
-	zippedSize=$(
-		stat -f"%z" "${tmpFile}.gz" 2> /dev/null; # macOS `stat`
-		stat -c"%s" "${tmpFile}.gz" 2> /dev/null; # GNU `stat`
-	);
-
-	echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully.";
+  echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully."
 }
 
 # Determine size of a file or total size of a directory
-function fs() {
-	if du -b /dev/null > /dev/null 2>&1; then
-		local arg=-sbh;
-	else
-		local arg=-sh;
-	fi
-	if [[ -n "$@" ]]; then
-		du $arg -- "$@";
-	else
-		du $arg .[^.]* ./*;
-	fi;
+fisi() {
+  local arg
+  if du -b /dev/null >/dev/null 2>&1; then
+    arg="-sbh"
+  else
+    arg="-sh"
+  fi
+
+  if [[ $# -gt 0 ]]; then
+    du $arg -- "$@"
+  else
+    du $arg .[^.]* ./*
+  fi
 }
 
 # Use Git’s colored diff when available
-hash git &>/dev/null;
-if [ $? -eq 0 ]; then
-	function diff() {
-		git diff --no-index --color-words "$@";
-	}
-fi;
+if command -v git >/dev/null 2>&1; then
+  diff() {
+    git diff --no-index --color-words "$@"
+  }
+fi
 
 # Create a data URL from a file
-function dataurl() {
-	local mimeType=$(file -b --mime-type "$1");
-	if [[ $mimeType == text/* ]]; then
-		mimeType="${mimeType};charset=utf-8";
-	fi
-	echo "data:${mimeType};base64,$(openssl base64 -in "$1" | tr -d '\n')";
+dataurl() {
+  local mimeType
+  mimeType=$(file -b --mime-type "$1")
+  if [[ $mimeType == text/* ]]; then
+    mimeType="${mimeType};charset=utf-8"
+  fi
+  echo "data:${mimeType};base64,$(openssl base64 -in "$1" | tr -d '\n')"
 }
 
 # Start an HTTP server from a directory, optionally specifying the port
-function server() {
-
-	local port="${1:-8000}";
-	sleep 1 && open "http://localhost:${port}/" &
-	# Set the default Content-Type to `text/plain` instead of `application/octet-stream`
-	# And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
-	python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port";
+server() {
+  local port="${1:-8000}"
+  sleep 1 && open "http://localhost:${port}/" &
+  python3 -m http.server "$port"
 }
 
 # Start a PHP server from a directory, optionally specifying the port
-# (Requires PHP 5.4.0+.)
-function phpserver() {
-	local port="${1:-4000}";
-	local ip=$(ipconfig getifaddr en1);
-	sleep 1 && open "http://${ip}:${port}/" &
-	php -S "${ip}:${port}";
+phpserver() {
+  local port="${1:-4000}"
+  local ip
+  ip=$(ipconfig getifaddr en1)
+  sleep 1 && open "http://${ip}:${port}/" &
+  php -S "${ip}:${port}"
 }
 
 # Compare original and gzipped file size
-function gz() {
-	local origsize=$(wc -c < "$1");
-	local gzipsize=$(gzip -c "$1" | wc -c);
-	local ratio=$(echo "$gzipsize * 100 / $origsize" | bc -l);
-	printf "orig: %d bytes\n" "$origsize";
-	printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio";
+gz() {
+  local origsize gzipsize ratio
+  origsize=$(wc -c < "$1")
+  gzipsize=$(gzip -c "$1" | wc -c)
+  ratio=$(echo "$gzipsize * 100 / $origsize" | bc -l)
+  printf "orig: %d bytes\n" "$origsize"
+  printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio"
 }
 
-# Run `dig` and display the most useful info
-function digga() {
-	dig +nocmd "$1" any +multiline +noall +answer;
+# Run dig and display the most useful info
+digga() {
+  dig +nocmd "$1" any +multiline +noall +answer
 }
 
-# Show all the names (CNs and SANs) listed in the SSL certificate
-# for a given domain
-function getcertnames() {
-	if [ -z "${1}" ]; then
-		echo "ERROR: No domain specified.";
-		return 1;
-	fi;
+# Show all the names (CNs and SANs) listed in the SSL certificate for a domain
+getcertnames() {
+  if [ -z "$1" ]; then
+    echo "ERROR: No domain specified."
+    return 1
+  fi
 
-	local domain="${1}";
-	echo "Testing ${domain}…";
-	echo ""; # newline
+  local domain="$1"
+  local tmp
+  local certText
 
-	local tmp=$(echo -e "GET / HTTP/1.0\nEOT" \
-		| openssl s_client -connect "${domain}:443" -servername "${domain}" 2>&1);
+  echo "Testing ${domain}..."
+  echo
 
-	if [[ "${tmp}" = *"-----BEGIN CERTIFICATE-----"* ]]; then
-		local certText=$(echo "${tmp}" \
-			| openssl x509 -text -certopt "no_aux, no_header, no_issuer, no_pubkey, \
-			no_serial, no_sigdump, no_signame, no_validity, no_version");
-		echo "Common Name:";
-		echo ""; # newline
-		echo "${certText}" | grep "Subject:" | sed -e "s/^.*CN=//" | sed -e "s/\/emailAddress=.*//";
-		echo ""; # newline
-		echo "Subject Alternative Name(s):";
-		echo ""; # newline
-		echo "${certText}" | grep -A 1 "Subject Alternative Name:" \
-			| sed -e "2s/DNS://g" -e "s/ //g" | tr "," "\n" | tail -n +2;
-		return 0;
-	else
-		echo "ERROR: Certificate not found.";
-		return 1;
-	fi;
+  tmp=$(
+    echo -e "GET / HTTP/1.0\nEOT" |
+      openssl s_client -connect "${domain}:443" -servername "${domain}" 2>&1
+  )
+
+  if [[ "${tmp}" == *"-----BEGIN CERTIFICATE-----"* ]]; then
+    certText=$(
+      echo "${tmp}" |
+        openssl x509 -text -certopt "no_aux, no_header, no_issuer, no_pubkey, no_serial, no_sigdump, no_signame, no_validity, no_version"
+    )
+    echo "Common Name:"
+    echo
+    echo "${certText}" | grep "Subject:" | sed -e "s/^.*CN=//" -e "s/\/emailAddress=.*//"
+    echo
+    echo "Subject Alternative Name(s):"
+    echo
+    echo "${certText}" | grep -A 1 "Subject Alternative Name:" |
+      sed -e "2s/DNS://g" -e "s/ //g" | tr "," "\n" | tail -n +2
+  else
+    echo "ERROR: Certificate not found."
+    return 1
+  fi
 }
 
-# Normalize `open` across Linux, macOS, and Windows.
-# This is needed to make the `o` function (see below) cross-platform.
-if [ ! $(uname -s) = 'Darwin' ]; then
-	if grep -q Microsoft /proc/version; then
-		# Ubuntu on Windows using the Linux subsystem
-		alias open='explorer.exe';
-	else
-		alias open='xdg-open';
-	fi
+# Normalize open across Linux, macOS, and Windows.
+if [ "$(uname -s)" != "Darwin" ]; then
+  if grep -q Microsoft /proc/version 2>/dev/null; then
+    alias open='explorer.exe'
+  else
+    alias open='xdg-open'
+  fi
 fi
 
-# `o` with no arguments opens the current directory, otherwise opens the given
-# location
-function o() {
-	if [ $# -eq 0 ]; then
-		open .;
-	else
-		open "$@";
-	fi;
+# Open current directory or provided path
+o() {
+  if [ $# -eq 0 ]; then
+    open .
+  else
+    open "$@"
+  fi
 }
 
-# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
-# the `.git` directory, listing directories first. The output gets piped into
-# `less` with options to preserve color and line numbers, unless the output is
-# small enough for one screen.
-function tre() {
-	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
+# Tree shorthand
+tre() {
+  tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX
+}
+
+# Create a new worktree + new branch
+# Usage: wtn <new-branch-name> [base-branch]
+wtn() {
+  local branch="$1"
+  local base="${2:-$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/@@')}"
+  local repo_root repo_name parent_dir safe_branch dir
+
+  if [ -z "$branch" ]; then
+    echo "Usage: wtn <new-branch> [base]"
+    return 1
+  fi
+
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+  repo_name=$(basename "$repo_root")
+  parent_dir=$(dirname "$repo_root")
+  safe_branch=$(echo "$branch" | tr '/' '-')
+  dir="$parent_dir/$repo_name-$safe_branch"
+
+  git -C "$repo_root" fetch origin
+  git -C "$repo_root" worktree add "$dir" -b "$branch" "$base" || return 1
+  cd "$dir"
+}
+
+# Create a new worktree from an existing branch
+wte() {
+  local branch="$1"
+  local repo_root repo_name parent_dir safe_branch dir
+
+  if [ -z "$branch" ]; then
+    echo "Usage: wte <existing-branch>"
+    return 1
+  fi
+
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+  repo_name=$(basename "$repo_root")
+  parent_dir=$(dirname "$repo_root")
+  safe_branch=$(echo "$branch" | tr '/' '-')
+  dir="$parent_dir/$repo_name-$safe_branch"
+
+  git -C "$repo_root" worktree add "$dir" "$branch" || return 1
+  cd "$dir"
+}
+
+# List worktrees
+wtl() {
+  git worktree list
+}
+
+# Remove a worktree by path
+wtr() {
+  local dir="$1"
+  if [ -z "$dir" ]; then
+    echo "Usage: wtr <path>"
+    return 1
+  fi
+
+  git worktree remove "$dir"
+}
+
+# Open a worktree in VS Code Insiders by branch name
+wto() {
+  local branch="$1"
+  local repo_root dir
+
+  if [ -z "$branch" ]; then
+    echo "Usage: wto <branch-name>"
+    return 1
+  fi
+
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+
+  dir=$(git -C "$repo_root" worktree list --porcelain | awk -v branch="refs/heads/$branch" '
+    $1 == "worktree" { wt = $2 }
+    $1 == "branch" && $2 == branch { print wt; exit }
+  ')
+
+  if [ -z "$dir" ]; then
+    echo "No worktree found for branch: $branch"
+    return 1
+  fi
+
+  code-insiders --new-window "$dir"
 }

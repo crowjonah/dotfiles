@@ -13,7 +13,7 @@ alias -- -="cd -"
 alias slt='open -a "Sublime Text"'
 # also/or do this:
 # ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ~/bin/subl
-
+alias python='python3'
 
 # be nice
 alias please=sudo
@@ -157,3 +157,8 @@ done
 
 # Make Grunt print stack traces by default
 command -v grunt > /dev/null && alias grunt="grunt --stack"
+
+alias mir="WITH_MIRAGE=true WITH_TESTS_ROUTE=true pnpm start"
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload="exec ${SHELL} -l"
