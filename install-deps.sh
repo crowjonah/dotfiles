@@ -1,4 +1,16 @@
-# up to you (me) if you want to run this as a file or copy paste at your leisure
+#!/usr/bin/env bash
+
+# LEGACY NOTES — DO NOT RUN AS-IS.
+#
+# This file contains historical setup commands from an older macOS era.
+# Many commands are now deprecated, insecure, or no longer maintained.
+#
+# Prefer:
+# - Homebrew from https://brew.sh/
+# - ./brew.sh for formula installation
+# - modern language toolchains (e.g. mise/asdf/nvm/rbenv) as needed
+#
+# Keeping the original notes below for archival reference.
 
 
 # https://github.com/jamiew/git-friendly
