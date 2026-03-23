@@ -222,6 +222,247 @@ wtl() {
   git worktree list
 }
 
+# Clean up worktrees/branches whose upstream PRs are merged (or optionally closed),
+# defaulting to tracked branches whose upstream ref disappeared after auto-delete.
+# Usage:
+#   wtclean [--dry-run] [--apply] [--yes] [--force]
+#           [--include-closed-unmerged]
+#           [--no-include-stale-no-remote]
+#           [--include-never-pushed]
+#           [--require-closed-issue]
+#           [--verbose]
+wtclean() {
+  local dry_run=1
+  local assume_yes=0
+  local force=0
+  local include_closed_unmerged=0
+  local include_stale_no_remote=1
+  local include_never_pushed=0
+  local require_closed_issue=0
+  local verbose=0
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --dry-run) dry_run=1 ;;
+      --apply) dry_run=0 ;;
+      --yes|-y) assume_yes=1 ;;
+      --force) force=1 ;;
+      --include-closed-unmerged) include_closed_unmerged=1 ;;
+      --include-stale-no-remote) include_stale_no_remote=1 ;;
+      --no-include-stale-no-remote) include_stale_no_remote=0 ;;
+      --include-never-pushed) include_never_pushed=1 ;;
+      --require-closed-issue) require_closed_issue=1 ;;
+      --verbose) verbose=1 ;;
+      -h|--help)
+        cat <<'EOF'
+Usage: wtclean [options]
+
+Options:
+  --dry-run                  Show what would be removed (default)
+  --apply                    Actually remove worktrees/branches
+  --yes, -y                  Skip confirmation prompts
+  --force                    Force-delete branch/worktree when needed
+  --include-closed-unmerged  Also include PRs closed without merge
+  --include-stale-no-remote  Include branches whose tracked upstream no longer exists
+  --no-include-stale-no-remote
+                              Do not include branches whose tracked upstream no longer exists
+  --include-never-pushed     Include branches with no upstream configured (dangerous)
+  --require-closed-issue     Require issue parsed from branch name to be closed
+  --verbose                  Print why branches are skipped/included
+  -h, --help                 Show this help
+EOF
+        return 0
+        ;;
+      *)
+        echo "Unknown option: $1"
+        return 1
+        ;;
+    esac
+    shift
+  done
+
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "gh is required. Install GitHub CLI first."
+    return 1
+  fi
+
+  if [ "$dry_run" -eq 0 ] && [ "$assume_yes" -ne 1 ] && [ ! -t 0 ]; then
+    echo "Non-interactive stdin detected; re-run with --yes or from an interactive shell."
+    return 1
+  fi
+
+  local repo_root default_branch current_branch
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+  default_branch=$(git -C "$repo_root" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+  [ -z "$default_branch" ] && default_branch="main"
+  current_branch=$(git -C "$repo_root" branch --show-current)
+
+  local protected_regex
+  protected_regex="^(main|master|develop|dev|${default_branch})$"
+
+  _wtclean_worktree_for_branch() {
+    local target_branch="$1"
+    git -C "$repo_root" worktree list --porcelain | awk -v branch="refs/heads/${target_branch}" '
+      $1 == "worktree" { wt = substr($0, 10) }
+      $1 == "branch" && $2 == branch { print wt; exit }
+    '
+  }
+
+  local merged_set
+  merged_set=$(git -C "$repo_root" branch --merged "$default_branch" --format='%(refname:short)')
+
+  local branches branch
+  branches=$(git -C "$repo_root" for-each-ref refs/heads --format='%(refname:short)')
+
+  local candidates=0
+  local removed=0
+
+  while IFS= read -r branch; do
+    [ -z "$branch" ] && continue
+
+    if [[ "$branch" =~ $protected_regex ]]; then
+      [ "$verbose" -eq 1 ] && echo "Skip: $branch (protected)"
+      continue
+    fi
+    if [ "$branch" = "$current_branch" ]; then
+      [ "$verbose" -eq 1 ] && echo "Skip: $branch (current branch)"
+      continue
+    fi
+
+    local should_clean=0
+    local reason=""
+
+    # --- Classify upstream tracking status ---
+    local tracking_remote tracking_merge tracking_head tracking_ref has_tracking=0
+    tracking_remote=$(git -C "$repo_root" config --get "branch.$branch.remote")
+    tracking_merge=$(git -C "$repo_root" config --get "branch.$branch.merge")
+
+    if [ -n "$tracking_remote" ] && [ -n "$tracking_merge" ]; then
+      has_tracking=1
+      tracking_head=${tracking_merge#refs/heads/}
+      tracking_ref="refs/remotes/${tracking_remote}/${tracking_head}"
+
+      if ! git -C "$repo_root" show-ref --verify --quiet "$tracking_ref"; then
+        if [ "$include_stale_no_remote" -eq 1 ]; then
+          should_clean=1
+          reason="stale-no-remote (${tracking_remote}/${tracking_head})"
+        else
+          [ "$verbose" -eq 1 ] && echo "Skip: $branch (tracked upstream missing: ${tracking_remote}/${tracking_head}; pass --include-stale-no-remote)"
+        fi
+      fi
+    else
+      if [ "$include_never_pushed" -eq 1 ]; then
+        should_clean=1
+        reason="never-pushed (no upstream)"
+      else
+        [ "$verbose" -eq 1 ] && echo "Skip: $branch (no upstream; likely never pushed)"
+      fi
+    fi
+
+    # --- PR-based fallback/augmentation ---
+    if [ "$should_clean" -eq 0 ]; then
+      local pr_json pr_state pr_merged_at
+      pr_json=$(gh pr view "$branch" --json state,mergedAt --jq '{state:.state,mergedAt:.mergedAt}' 2>/dev/null)
+      if [ $? -eq 0 ]; then
+        pr_state=$(echo "$pr_json" | sed -n 's/.*"state":"\([^"]*\)".*/\1/p')
+        pr_merged_at=$(echo "$pr_json" | sed -n 's/.*"mergedAt":\(null\|"[^"]*"\).*/\1/p')
+
+        if [ "$pr_merged_at" != "null" ] && [ -n "$pr_merged_at" ]; then
+          should_clean=1
+          reason="pr-merged"
+        elif [ "$include_closed_unmerged" -eq 1 ] && [ "$pr_state" = "CLOSED" ]; then
+          should_clean=1
+          reason="pr-closed-unmerged"
+        else
+          [ "$verbose" -eq 1 ] && echo "Skip: $branch (PR not merged/eligible)"
+        fi
+      else
+        # PR lookup failed; only stale/no-upstream paths above can include it.
+        [ "$verbose" -eq 1 ] && echo "Skip: $branch (no resolvable PR by branch name)"
+      fi
+    fi
+
+    [ "$should_clean" -eq 0 ] && continue
+
+    if [ "$require_closed_issue" -eq 1 ]; then
+      local issue_num issue_state
+      issue_num=$(echo "$branch" | sed -nE 's@^([0-9]+)([-_/].*)?$@\1@p; s@^.*/([0-9]+)([-_/].*)?$@\1@p' | head -n1)
+      if [ -n "$issue_num" ]; then
+        issue_state=$(gh issue view "$issue_num" --json state --jq '.state' 2>/dev/null)
+        if [ "$issue_state" != "CLOSED" ]; then
+          [ "$verbose" -eq 1 ] && echo "Skip: $branch (linked issue #$issue_num not closed)"
+          continue
+        fi
+      else
+        [ "$verbose" -eq 1 ] && echo "Skip: $branch (no issue number parsable from branch name)"
+        continue
+      fi
+    fi
+
+    # Keep legacy safety check for non-force mode.
+    # Exception: allow stale/no-upstream inclusion without merged check.
+    if [ "$force" -ne 1 ]; then
+      if [[ "$reason" != stale-no-remote* ]] && [[ "$reason" != never-pushed* ]]; then
+        if ! echo "$merged_set" | grep -qx "$branch"; then
+          [ "$verbose" -eq 1 ] && echo "Skip: $branch (not merged into $default_branch)"
+          continue
+        fi
+      fi
+    fi
+
+    candidates=$((candidates + 1))
+    local wt_dir
+    wt_dir=$(_wtclean_worktree_for_branch "$branch")
+
+    echo "Candidate: $branch${wt_dir:+ (worktree: $wt_dir)} [${reason}]"
+
+    if [ "$dry_run" -eq 1 ]; then
+      continue
+    fi
+
+    if [ "$assume_yes" -ne 1 ]; then
+      local ans
+      printf "Remove branch/worktree for '%s'? [y/N] " "$branch"
+      read -r ans
+      case "$ans" in
+        y|Y|yes|YES) ;;
+        *)
+          echo "Skipped: $branch"
+          continue
+          ;;
+      esac
+    fi
+
+    local effective_force="$force"
+    if [[ "$reason" == stale-no-remote* ]] || [[ "$reason" == never-pushed* ]]; then
+      effective_force=1
+    fi
+
+    if [ -n "$wt_dir" ] && [ "$wt_dir" != "$repo_root" ]; then
+      if [ "$effective_force" -eq 1 ]; then
+        git -C "$repo_root" worktree remove --force "$wt_dir" || true
+      else
+        git -C "$repo_root" worktree remove "$wt_dir" || true
+      fi
+    fi
+
+    if [ "$effective_force" -eq 1 ]; then
+      git -C "$repo_root" branch -D "$branch" || true
+    else
+      git -C "$repo_root" branch -d "$branch" || true
+    fi
+
+    removed=$((removed + 1))
+  done <<< "$branches"
+
+  if [ "$dry_run" -eq 1 ]; then
+    echo "Dry run complete. Candidates: $candidates"
+    echo "Re-run with --apply to perform removals."
+  else
+    echo "Cleanup complete. Candidates: $candidates, removed: $removed"
+  fi
+}
+
 # Remove a worktree by path
 wtr() {
   local dir="$1"
